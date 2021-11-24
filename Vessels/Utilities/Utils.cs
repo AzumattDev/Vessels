@@ -22,6 +22,7 @@ namespace Vessels.Utilities
             foreach (var o in tmp)
             {
                 GameObject? obj = (GameObject)o;
+                Vessels.Gallion = obj;
                 zNetScene.m_prefabs.Add(obj);
                 int hashcode = obj.GetHashCode();
                 zNetScene.m_namedPrefabs.Add(hashcode, obj);

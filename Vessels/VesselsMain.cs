@@ -14,14 +14,14 @@ namespace Vessels
         private const string ModGUID = "azumatt.Vessels";
         private readonly Harmony _harmony = new(ModGUID);
         private static AssetBundle? assetBundle;
-        #region MyRegion
+        private static PieceTable? _hammer;
+
+        #region GameObjects
 
         /* Game Objects */
-        private static GameObject Gallion;
+        internal static GameObject? Gallion;
 
         #endregion
-        
-        
         public void Awake()
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -33,7 +33,7 @@ namespace Vessels
         {
             _harmony?.UnpatchSelf();
         }
-        
+
         [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake))]
         public static class VesselsZNetScene
         {
@@ -41,6 +41,24 @@ namespace Vessels
             {
                 if (__instance.m_prefabs.Count <= 0) return;
                 Utilities.Utils.LoadAssets(assetBundle, __instance);
+            }
+        }
+        [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake))]
+        public static class AddShitToHammer
+        {
+            public static void Postfix(ZNetScene __instance)
+            {
+                foreach (var o in Resources.FindObjectsOfTypeAll(typeof(PieceTable)))
+                {
+                    PieceTable? table = (PieceTable)o;
+                    string name = table.gameObject.name;
+                    if (name != "_HammerPieceTable") continue;
+                    _hammer = table;
+                    break;
+                }
+
+                if (_hammer is not null && (_hammer.m_pieces.Contains(Gallion))) return;
+                _hammer?.m_pieces.Add(Gallion);
             }
         }
     }
